@@ -1,4 +1,4 @@
-from database import mysession
+from api.database.database import mysession
 
 def get_session():
     session = mysession()

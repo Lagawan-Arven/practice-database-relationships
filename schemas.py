@@ -3,12 +3,12 @@ from typing import Optional
 
 class Hero_Create(BaseModel):
     name: str
-    weapon: Weapon_Create
+    weapons: Optional[list[Weapon_Create]] = None
 
 class Hero_Out(BaseModel):
     name: str
     id: str
-    weapon: Weapon_Out
+    weapon: Optional[list[Weapon_Out]]
 
     class Config:
         from_attributes = True
@@ -18,7 +18,7 @@ class Weapon_Create(BaseModel):
 
 class Weapon_Out(Weapon_Create):
     id: str
-    user_id: str
+    user_id: Optional[str]
 
     class Config:
         from_attributes = True

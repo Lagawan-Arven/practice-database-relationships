@@ -21,6 +21,6 @@ class Weapon(Base):
     name = Column(String)   
     user_id = Column(String(4),ForeignKey("Heroes.id",ondelete="SET NULL"),unique=True,nullable=True)
 
-    hero = relationship("Hero",back_populates="weapon")
+    hero = relationship("Hero",back_populates="weapon",uselist=False)
 
 Base.metadata.create_all(bind=engine)

@@ -26,17 +26,28 @@ class Inventory(Base):
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
     hero = relationship("Hero",back_populates="inventory",uselist=False)
-    weapons = relationship("Weapon",back_populates="inventory")
+    inventory_weapons = relationship("Inventory_Weapon",back_populates="inventories", cascade="all, delete-orphan")
+
+class Inventory_Weapon(Base):
+    __tablename__ = "Inventory_Weapons"
+
+    id = Column(String(4),primary_key=True,default=lambda: uuid4().hex[:4],unique=True,nullable=False)
+    inventory_id = Column(String(4),ForeignKey("Inventories.id",ondelete="CASCADE"),unique=False)
+    weapon_id = Column(String(4),ForeignKey("Weapons.id",ondelete="CASCADE"),unique=False)
+    added_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+
+    inventories = relationship("Inventory",back_populates="inventory_weapons")
+    weapons = relationship("Weapon",back_populates="weapon_inventories")
 
 class Weapon(Base):
     __tablename__ = "Weapons"
 
     id = Column(String(4),primary_key=True,default=lambda: uuid4().hex[:4],unique=True,nullable=False)
     name = Column(String)   
-    inventory_id = Column(String(4),ForeignKey("Inventories.id",ondelete="SET NULL"),unique=False,nullable=True)
     added_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
 
-    inventory = relationship("Inventory",back_populates="weapons")
+    weapon_inventories = relationship("Inventory_Weapon",back_populates="weapons", cascade="all, delete-orphan")
 
 Base.metadata.create_all(bind=engine)

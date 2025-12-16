@@ -36,12 +36,11 @@ def update_inventory(inventory_id: str,
         if not updates.weapon_name and not updates.weapon_id:
             raise HTTPException(status_code=400,detail="Invalid action!")
         db_weapon = session.get(models.Weapon,updates.weapon_id)
-        if not db_weapon:
-            db_inventory.weapons = models.Weapon(name = updates.weapon_name, inventory_id = db_inventory.id)
-        if db_weapon.inventory_id == None:
-            db_weapon.inventory_id = db_inventory.id
-        elif db_weapon.inventory_id != None:
-            raise HTTPException(status_code=403,detail="The weapon is no longer available")
+        if not db_weapon and not updates.weapon_name:
+            raise HTTPException(status_code=404,detail="Weapon not found")
+        if updates.weapon_name:
+            db_inventory.inventory_weapons = models.Weapon(name = updates.weapon_name)
+        db_inventory.inventory_weapons = db_weapon
 
     elif updates.action == "remove":
         if not updates.weapon_id:
@@ -49,11 +48,9 @@ def update_inventory(inventory_id: str,
         db_weapon = session.query(models.Weapon).filter(models.Weapon.inventory_id==db_inventory.id).first()
         if not db_weapon:
             raise HTTPException(status_code=404,detail="Weapon not found")
-        
-        db_weapon.inventory_id = None
 
     elif updates.action == "remove_all":
-        db_inventory.weapons = []
+        db_inventory.inventory_weapons = []
 
     else:
        raise HTTPException(status_code=400,detail="Invalid input!")  

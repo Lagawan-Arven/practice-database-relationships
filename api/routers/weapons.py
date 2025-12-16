@@ -52,3 +52,8 @@ def delete_weapon(weapon_id: str,
     session.delete(db_weapon)
     session.commit()
     return {"message":"Weapon deleted successfully!"}
+
+@router.delete("/weapons")
+def delete_all_weapons(session: Session = Depends(get_session)):
+    session.query(models.Weapon).delete()
+    session.commit()

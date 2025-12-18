@@ -7,7 +7,7 @@ from api.database import models
 
 router = APIRouter()
 
-@router.get("/weapons",response_model=list[schemas.Weapon_Out])
+@router.get("/weapons",response_model=list[schemas.Base_Weapon_Out])
 def get_all_weapons(session: Session = Depends(get_session)):
 
     db_weapons = session.query(models.Weapon).all()
@@ -21,7 +21,8 @@ def add_weapon(weapon_input: schemas.Weapon_Create,
                session: Session = Depends(get_session)):
     
     new_weapon = models.Weapon(
-        name = weapon_input.name
+        name = weapon_input.name,
+        stock = weapon_input.stock
     )
     session.add(new_weapon)
     session.commit()
@@ -30,13 +31,21 @@ def add_weapon(weapon_input: schemas.Weapon_Create,
 
 @router.put("/weapons/{weapon_id}")
 def update_weapon(weapon_id: str,
-                  weapon_update: schemas.Weapon_Create,
+                  weapon_update: schemas.Weapon_Update,
                   session: Session = Depends(get_session)):
     
     db_weapon = session.query(models.Weapon).filter(models.Weapon.id==weapon_id).first()
     if not db_weapon:
         raise HTTPException(status_code=404,detail="Weapon not found!")
-    db_weapon.name = weapon_update.name
+
+    if weapon_update.name and weapon_update.stock:
+        db_weapon.name = weapon_update.name
+        db_weapon.stock = weapon_update.stock
+    elif weapon_update.name and not weapon_update.stock:
+        db_weapon.name = weapon_update.name
+    elif not weapon_update.name and weapon_update.stock:
+        db_weapon.stock = weapon_update.stock
+
     session.commit()
     session.refresh(db_weapon)
     return {"message":"Weapon updated successfully!"}

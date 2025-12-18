@@ -1,28 +1,33 @@
 from pydantic import BaseModel
 from typing import Optional
 
+#==================================
+            #HERO
+#==================================
 class Hero_Create(BaseModel):
     name: str
 
-class Hero_Out(BaseModel):
+class Hero_Update(BaseModel):
     name: str
+
+class Hero_Out(BaseModel):
     id: str
-    inventory: Hero_Inventory_Out
+    name: str
+    inventory: Inventory_Out
 
     class Config:
         from_attributes = True
 
-#==========================
-# one-to-one
-#==========================
-
+#==================================
+            #INVENTORY
+#==================================
 class Inventory_Update(BaseModel):
-    weapon_name: Optional[str]
-    weapon_id: Optional[str]
-    action: str
+    weapon_id: str
+    quantity: Optional[int] = 1
 
-class Hero_Inventory_Out(BaseModel):
+class Base_Inventory_Out(BaseModel):
     id: str
+    hero_id: str
     inventory_weapons: list[Inventory_Weapon_Out] = []
 
     class Config:
@@ -30,44 +35,52 @@ class Hero_Inventory_Out(BaseModel):
 
 class Inventory_Out(BaseModel):
     id: str
-    user_id: str
     inventory_weapons: list[Inventory_Weapon_Out] = []
 
     class Config:
         from_attributes = True
 
-#===========================
-# link for many-to-many
-#===========================
-
+#==================================
+    #INVENTORY AND WEAPON LINK
+#==================================
 class Inventory_Weapon_Out(BaseModel):
-    weapon: Nested_Weapon_Out
+    weapon: Weapon_Out
+    quantity: int
 
     class Config:
         from_attributes = True
 
 class Weapon_Inventory_Out(BaseModel):
-    inventory_id: str
+    weapon: Weapon_Out
+    quantity: int
 
     class Config:
         from_attributes = True
 
-#===========================
-# link for many-to-many
-#===========================
 
+#==================================
+            #WEAPON
+#==================================
 class Weapon_Create(BaseModel):
     name: str
+    stock: int
 
-class Weapon_Out(Weapon_Create):
+class Weapon_Update(BaseModel):
+    name: Optional[str] = None
+    stock: Optional[int] = None
+
+class Base_Weapon_Out(BaseModel):
     id: str
-    weapon_inventories: list[Weapon_Inventory_Out] = []
+    name: str
+    stock: int
 
     class Config:
         from_attributes = True
 
-class Nested_Weapon_Out(Weapon_Create):
+class Weapon_Out(BaseModel):
     id: str
+    name: str
 
     class Config:
         from_attributes = True
+

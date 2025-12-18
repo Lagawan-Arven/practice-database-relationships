@@ -1,4 +1,4 @@
-from sqlalchemy import Integer,String,ForeignKey,Column,DateTime
+from sqlalchemy import Integer,String,ForeignKey,Column,DateTime,UniqueConstraint
 from sqlalchemy.orm import relationship,declarative_base
 from datetime import datetime,timezone
 from uuid import uuid4
@@ -22,7 +22,7 @@ class Inventory(Base):
     __tablename__ = "Inventories"
 
     id = Column(String(4),primary_key=True,default=lambda: uuid4().hex[:4],unique=True,nullable=False)
-    user_id = Column(String(4),ForeignKey("Heroes.id",ondelete="CASCADE"),unique=True,nullable=False)
+    hero_id = Column(String(4),ForeignKey("Heroes.id",ondelete="CASCADE"),unique=True,nullable=False)
 
     added_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
@@ -32,10 +32,12 @@ class Inventory(Base):
 
 class Inventory_Weapon(Base):
     __tablename__ = "Inventory_Weapons"
+    __table_args__ = (UniqueConstraint("inventory_id","weapon_id",name="uq_inventory_weapon"),)
 
     id = Column(String(4),primary_key=True,default=lambda: uuid4().hex[:4],unique=True,nullable=False)
     inventory_id = Column(String(4),ForeignKey("Inventories.id",ondelete="CASCADE"),unique=False)
     weapon_id = Column(String(4),ForeignKey("Weapons.id",ondelete="CASCADE"),unique=False)
+    quantity = Column(Integer)
 
     added_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
@@ -48,6 +50,7 @@ class Weapon(Base):
 
     id = Column(String(4),primary_key=True,default=lambda: uuid4().hex[:4],unique=True,nullable=False)
     name = Column(String)   
+    stock = Column(Integer,default=0)
 
     added_at = Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
     updated_at = Column(DateTime, default=datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
